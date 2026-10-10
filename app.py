@@ -100,7 +100,30 @@ if st.button("🔍 Predict Risk", type="primary"):
     a.metric("Rainfall", f"{rainfall:.1f} mm")
     b.metric("River level", f"{river_level:.2f} m")
     c.metric("Soil saturation", f"{soil_saturation}%")
+    
+    st.markdown("### 📊 Environmental Readings Chart")
 
+    chart_data = pd.DataFrame({
+        "Measurement": [
+            "Rainfall (mm)",
+            "River level (m)",
+            "Soil saturation (%)"
+        ],
+        "Value": [
+            rainfall,
+            river_level,
+            soil_saturation
+        ]
+    })
+
+    st.bar_chart(
+        chart_data,
+        x="Measurement",
+        y="Value",
+        x_label="Environmental measurement",
+        y_label="Entered value",
+        use_container_width=True
+    )
     st.markdown("### Suggested response")
     st.write(guidance)
 
