@@ -1,8 +1,8 @@
 
+
 import streamlit as st
 import pandas as pd
-import joblib
-import os
+from sklearn.tree import DecisionTreeClassifier
 
 st.set_page_config(
     page_title="Garry's AI Disaster Response System",
@@ -11,29 +11,41 @@ st.set_page_config(
 )
 
 st.title("🌊 Garry's AI Disaster Response System")
-st.caption("AI-assisted flood-risk classification prototype")
+st.caption("Developed by Garry | AI/ML Engineering Project")
 
 st.warning(
-    "Educational prototype using synthetic training data. "
-    "Not suitable for real-world flood warnings or emergency decisions."
+    "Educational prototype using synthetic data. "
+    "This is not a real flood-warning system."
 )
 
-MODEL_PATH = os.path.join(
-    os.path.dirname(__file__),
-    "flood_risk_model.pkl"
+# Demonstration dataset
+data = {
+    "rainfall_mm": [10, 25, 40, 60, 80, 100, 120, 150, 35, 90],
+    "river_level_m": [1.0, 1.2, 1.5, 2.0, 2.5, 3.0, 3.5, 4.0, 1.4, 2.8],
+    "soil_saturation_pct": [20, 25, 35, 45, 60, 70, 80, 95, 30, 65],
+    "flood_risk": [
+        "Low", "Low", "Low", "Moderate", "Moderate",
+        "High", "High", "High", "Low", "Moderate"
+    ]
+}
+
+df = pd.DataFrame(data)
+
+X = df[[
+    "rainfall_mm",
+    "river_level_m",
+    "soil_saturation_pct"
+]]
+y = df["flood_risk"]
+
+# Train a demonstration model
+model = DecisionTreeClassifier(
+    max_depth=3,
+    random_state=42
 )
+model.fit(X, y)
 
-@st.cache_resource
-def load_model():
-    return joblib.load(MODEL_PATH)
-
-if not os.path.exists(MODEL_PATH):
-    st.error("Model file not found. Please add flood_risk_model.pkl to the repository.")
-    st.stop()
-
-model = load_model()
-
-st.subheader("Enter environmental conditions")
+st.subheader("Environmental Conditions")
 
 rainfall = st.number_input(
     "Rainfall (mm)",
@@ -56,7 +68,7 @@ soil_saturation = st.slider(
     value=72
 )
 
-if st.button("Predict flood-risk category"):
+if st.button("Predict Risk"):
     new_data = pd.DataFrame([{
         "rainfall_mm": rainfall,
         "river_level_m": river_level,
@@ -65,15 +77,18 @@ if st.button("Predict flood-risk category"):
 
     prediction = model.predict(new_data)[0]
 
-    st.subheader("Model result")
+    st.subheader("Prediction Result")
     st.metric("Predicted category", prediction)
-
-    st.write("Input summary")
     st.dataframe(new_data, use_container_width=True)
 
 st.divider()
-st.subheader("About this project")
+st.subheader("About the Project")
 st.write(
-    "Developed by Garry as a computer science engineering project "
-    "exploring machine learning and emergency-response support."
+    "This project demonstrates how a Decision Tree "
+    "Classifier can process environmental inputs. "
+    "The sample dataset is synthetic and is not suitable "
+    "for real-world emergency decisions."
 )
+
+with st.expander("View sample dataset"):
+    st.dataframe(df, use_container_width=True)
