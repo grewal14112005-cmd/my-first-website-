@@ -1,5 +1,4 @@
 
-
 import streamlit as st
 import pandas as pd
 from sklearn.tree import DecisionTreeClassifier
@@ -15,7 +14,7 @@ st.caption("Developed by Garry | AI/ML Engineering Project")
 
 st.warning(
     "Educational prototype using synthetic data. "
-    "This is not a real flood-warning system."
+    "Not suitable for real-world flood warnings."
 )
 
 # Demonstration dataset
@@ -38,37 +37,28 @@ X = df[[
 ]]
 y = df["flood_risk"]
 
-# Train a demonstration model
-model = DecisionTreeClassifier(
-    max_depth=3,
-    random_state=42
-)
+model = DecisionTreeClassifier(max_depth=3, random_state=42)
 model.fit(X, y)
 
-st.subheader("Environmental Conditions")
+st.subheader("🌧️ Environmental Conditions")
 
-rainfall = st.number_input(
-    "Rainfall (mm)",
-    min_value=0.0,
-    max_value=500.0,
-    value=85.0
-)
+col1, col2 = st.columns(2)
 
-river_level = st.number_input(
-    "River level (m)",
-    min_value=0.0,
-    max_value=20.0,
-    value=2.7
-)
+with col1:
+    rainfall = st.number_input(
+        "Rainfall (mm)", 0.0, 500.0, 85.0
+    )
+
+with col2:
+    river_level = st.number_input(
+        "River level (m)", 0.0, 20.0, 2.7
+    )
 
 soil_saturation = st.slider(
-    "Soil saturation (%)",
-    min_value=0,
-    max_value=100,
-    value=72
+    "Soil saturation (%)", 0, 100, 72
 )
 
-if st.button("Predict Risk"):
+if st.button("🔍 Predict Risk", type="primary"):
     new_data = pd.DataFrame([{
         "rainfall_mm": rainfall,
         "river_level_m": river_level,
@@ -78,17 +68,53 @@ if st.button("Predict Risk"):
     prediction = model.predict(new_data)[0]
 
     st.subheader("Prediction Result")
-    st.metric("Predicted category", prediction)
-    st.dataframe(new_data, use_container_width=True)
+
+    if prediction == "Low":
+        st.success("🟢 LOW RISK CATEGORY")
+        guidance = (
+            "Continue monitoring conditions. "
+            "Follow local weather and official advisories."
+        )
+    elif prediction == "Moderate":
+        st.warning("🟠 MODERATE RISK CATEGORY")
+        guidance = (
+            "Monitor official weather alerts and river updates. "
+            "Prepare an emergency kit as appropriate."
+        )
+    else:
+        st.error("🔴 HIGH RISK CATEGORY")
+        guidance = (
+            "Check official emergency alerts immediately. "
+            "Follow local authorities' evacuation instructions "
+            "if issued. Do not enter floodwater."
+        )
+
+    st.info(
+        "Illustrative model output only. "
+        "Use official warnings for real safety decisions."
+    )
+
+    st.markdown("### Environmental readings")
+
+    a, b, c = st.columns(3)
+    a.metric("Rainfall", f"{rainfall:.1f} mm")
+    b.metric("River level", f"{river_level:.2f} m")
+    c.metric("Soil saturation", f"{soil_saturation}%")
+
+    st.markdown("### Suggested response")
+    st.write(guidance)
 
 st.divider()
+
 st.subheader("About the Project")
 st.write(
-    "This project demonstrates how a Decision Tree "
-    "Classifier can process environmental inputs. "
-    "The sample dataset is synthetic and is not suitable "
-    "for real-world emergency decisions."
+    "This project demonstrates a Decision Tree Classifier "
+    "using three environmental inputs. The dataset contains "
+    "only 10 synthetic examples, so predictions are not "
+    "scientifically validated and must not guide real "
+    "emergency decisions."
 )
 
 with st.expander("View sample dataset"):
     st.dataframe(df, use_container_width=True)
+    
